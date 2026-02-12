@@ -1,0 +1,14 @@
+---
+- name: Configure MySQL database server
+  hosts: db
+  become: true
+  roles:
+    - role: mysql
+
+- name: Configure Prestashop web server
+  hosts: web
+  become: true
+  vars:
+    prestashop_db_host: "{{ hostvars[groups['db'][0]].ansible_host | default(groups['db'][0]) }}"
+  roles:
+    - role: prestashop

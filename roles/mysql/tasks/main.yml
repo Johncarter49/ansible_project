@@ -1,0 +1,50 @@
+---
+- name: Install MySQL and dependencies
+  ansible.builtin.apt:
+    name:
+      - mysql-server
+      - python3-pymysql
+    state: present
+    update_cache: true
+
+- name: Configure MySQL bind address
+  ansible.builtin.template:
+    src: mysqld.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart mysql
+
+- name: Ensure mysql service is started and enabled
+  ansible.builtin.service:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Set root password and ensure root can connect remotely
+  community.mysql.mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: "{{ mysql_root_password }}"
+    login_unix_socket: /run/mysqld/mysqld.sock
+    priv: "*.*:ALL,GRANT"
+    state: present
+  loop: "{{ mysql_allowed_sources }}"
+
+- name: Create Prestashop database
+  community.mysql.mysql_db:
+    name: "{{ mysql_prestashop_db }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create Prestashop database user
+  community.mysql.mysql_user:
+    name: "{{ mysql_prestashop_user }}"
+    host: "%"
+    password: "{{ mysql_prestashop_password }}"
+    priv: "{{ mysql_prestashop_db }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
