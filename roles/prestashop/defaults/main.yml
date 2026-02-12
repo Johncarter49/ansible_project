@@ -1,0 +1,9 @@
+---
+prestashop_version: "8.1.7"
+prestashop_install_dir: /var/www/prestashop
+prestashop_archive_url: "https://github.com/PrestaShop/PrestaShop/releases/download/{{ prestashop_version }}/prestashop_{{ prestashop_version }}.zip"
+prestashop_server_name: "_"
+prestashop_db_name: prestashop
+prestashop_db_user: prestashop
+prestashop_db_password: "ChangeMeStrongAppPassword!"
+prestashop_db_host: 127.0.0.1

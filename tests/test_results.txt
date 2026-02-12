@@ -1,0 +1,4 @@
+$ ansible-playbook --syntax-check site.yml
+bash: command not found: ansible-playbook
+
+Result: WARNING - Ansible binary is not installed in this execution environment.

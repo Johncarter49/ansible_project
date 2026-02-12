@@ -1,0 +1,76 @@
+---
+- name: Install Apache, PHP and required packages
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - unzip
+      - php
+      - libapache2-mod-php
+      - php-mysql
+      - php-xml
+      - php-curl
+      - php-gd
+      - php-intl
+      - php-mbstring
+      - php-zip
+    state: present
+    update_cache: true
+
+- name: Ensure Prestashop directory exists
+  ansible.builtin.file:
+    path: "{{ prestashop_install_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Download Prestashop archive
+  ansible.builtin.get_url:
+    url: "{{ prestashop_archive_url }}"
+    dest: /tmp/prestashop.zip
+    mode: '0644'
+
+- name: Extract Prestashop archive
+  ansible.builtin.unarchive:
+    src: /tmp/prestashop.zip
+    dest: "{{ prestashop_install_dir }}"
+    remote_src: true
+    owner: www-data
+    group: www-data
+    creates: "{{ prestashop_install_dir }}/index.php"
+
+- name: Configure Apache virtual host for Prestashop
+  ansible.builtin.template:
+    src: prestashop.conf.j2
+    dest: /etc/apache2/sites-available/prestashop.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload apache2
+
+- name: Enable Prestashop site
+  ansible.builtin.command: a2ensite prestashop.conf
+  args:
+    creates: /etc/apache2/sites-enabled/prestashop.conf
+  notify: Reload apache2
+
+- name: Disable default Apache site
+  ansible.builtin.command: a2dissite 000-default.conf
+  args:
+    removes: /etc/apache2/sites-enabled/000-default.conf
+  notify: Reload apache2
+
+- name: Enable Apache rewrite module
+  ansible.builtin.command: a2enmod rewrite
+  args:
+    creates: /etc/apache2/mods-enabled/rewrite.load
+  notify: Reload apache2
+
+- name: Ensure apache2 is enabled and started
+  ansible.builtin.service:
+    name: apache2
+    state: started
+    enabled: true
+
+- name: Flush handlers now to apply Apache config
+  ansible.builtin.meta: flush_handlers

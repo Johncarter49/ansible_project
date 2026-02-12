@@ -1,0 +1,8 @@
+---
+mysql_root_password: "ChangeMeStrongRootPassword!"
+mysql_prestashop_db: prestashop
+mysql_prestashop_user: prestashop
+mysql_prestashop_password: "ChangeMeStrongAppPassword!"
+mysql_bind_address: 0.0.0.0
+mysql_allowed_sources:
+  - "%"

@@ -1,0 +1,12 @@
+<VirtualHost *:80>
+    ServerName {{ prestashop_server_name }}
+    DocumentRoot {{ prestashop_install_dir }}
+
+    <Directory {{ prestashop_install_dir }}>
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/prestashop_error.log
+    CustomLog ${APACHE_LOG_DIR}/prestashop_access.log combined
+</VirtualHost>
